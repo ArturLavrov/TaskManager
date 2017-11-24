@@ -1,15 +1,29 @@
 var MongoClient = require('mongodb').MongoClient;
 
 exports.insertDocument = function(userObject){
-  var url = "mongodb://Artur:qwerty@ds113936.mlab.com:13936/todo_manager";  
-  MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        db.collection("users").insertOne(userObject, function(err, res) {
-          if (err) throw err;
-          console.log("1 document inserted");
-          db.close();
-        });
-      });
+  return new Promise(function(resolve,reject){
+      var url = "mongodb://Artur:qwerty@ds113936.mlab.com:13936/todo_manager";
+      var dbResult;
+
+      MongoClient.connect(url, function(err, db) {
+            if (err) {
+              return reject(err);
+            }
+            db.collection("users").insertOne(userObject, function(err, res) {
+              if (err){ 
+                return reject(err);
+              };
+              
+              dbResult = {
+                code: 200,
+                phrase: 'SECCESS',
+                message: '1 document was inserted'
+              };
+              return resolve(dbResult);
+              db.close();
+            });
+          });
+    });
 }
 exports.insertDocuments = function(docuements){
 }

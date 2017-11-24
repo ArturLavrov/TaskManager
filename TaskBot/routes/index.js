@@ -37,10 +37,11 @@ router.get('/callback',function(req,res){
                 console.log(JSON.stringify(userObject));
                 
                 res.render('successfulAuth', { pageData:userObject })
-                dataAccessObject.insertDocument(userObject);
-             }).catch(function(err){
-                 console.log(err);
-             });    
+                
+                dataAccessObject.insertDocument(userObject).then(function(dbResult){
+                        console.log(dbResult.message);
+                }); 
+             });   
          });
     }).catch(function(err){
         console.log(err);
