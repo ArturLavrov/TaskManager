@@ -80,8 +80,15 @@ router.post('/',function(req,res){
         
         query = { "repositories.id" : repositoryId  }
 
-        dataAccessObject.getDocumentByQuery(query);
-        
+        dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
+            if(dbResult.data.length > 0){
+                //start processing pipeline here.
+            }else {
+                return;
+            }
+        }).catch(function(err){
+            console.log(err);
+        });
       }
    }
 });
