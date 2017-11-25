@@ -37,10 +37,6 @@ router.get('/callback',function(req,res){
                 console.log(JSON.stringify(userObject));
                 
                 res.render('successfulAuth', { pageData:userObject })
-                
-                dataAccessObject.insertDocument(userObject).then(function(dbResult){
-                        console.log(dbResult.message);
-                }); 
              });   
          });
     }).catch(function(err){
@@ -51,14 +47,19 @@ router.get('/callback',function(req,res){
 
 router.post('/finsihedIntegration',function(req,res){
    var data = req.body;
-   if(data !== "" && data !== undefined){
+   if(data !== "" && data !== undefined) {
        if(utils.isJsonValid(JSON.stringify(data))) {
-            dataAccessObject.insertDocument(data);
-            res.sendStatus(200);
+            dataAccessObject.insertDocument(data).then(function(dbResult){
+                if(dbResult.code === 200){
+                    res.send(200);
+                }
+            }).catch(function(err){
+                console.log(err);
+            }); 
        }else {
-           res.send(500);
+            res.send(500);
        }
-   }else{
+   }else {
        res.sendStatus(500);
    }
 });
