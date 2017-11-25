@@ -5,7 +5,7 @@ var utils = require('../modules/utils');
 
 /* GET home page. */
 router.get('/', function(req, res, next) { 
-        res.sendfile("views/index.html");  
+    res.sendfile("views/index.html");  
 });
 /* GET recive github auth callbach. */
 router.get('/callback',function(req,res){
@@ -36,7 +36,7 @@ router.get('/callback',function(req,res){
                 userObject.repositories = userRepos;
                 console.log(JSON.stringify(userObject));
                 
-                res.render('successfulAuth', { pageData:userObject })
+                res.render('repos', { pageData:userObject })
              });   
          });
     }).catch(function(err){
