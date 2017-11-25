@@ -1,15 +1,19 @@
 var MongoClient = require('mongodb').MongoClient;
 
+var dbSettings = {
+    url: "mongodb://Artur:qwerty@ds113936.mlab.com:13936/todo_manager",
+    collection: "users",
+};
+
 exports.insertDocument = function(userObject){
   return new Promise(function(resolve,reject){
-      var url = "mongodb://Artur:qwerty@ds113936.mlab.com:13936/todo_manager";
       var dbResult;
 
-      MongoClient.connect(url, function(err, db) {
+      MongoClient.connect(dbSettings.url, function(err, db) {
             if (err) {
               return reject(err);
             }
-            db.collection("users").insertOne(userObject, function(err, res) {
+            db.collection(dbSettings.collection).insertOne(userObject, function(err, res) {
               if (err){ 
                 return reject(err);
               };
@@ -29,14 +33,13 @@ exports.insertDocuments = function(docuements){
 }
 exports.getDocumentByQuery = function(query) {
   return new Promise(function(resolve, reject){
-      var url = "mongodb://Artur:qwerty@ds113936.mlab.com:13936/todo_manager";  
       var dbResult;
 
-      MongoClient.connect(url, function(err, db) {
+      MongoClient.connect(dbSettings.url, function(err, db) {
         if (err) {
           return reject(err);
         };
-        db.collection("users").find(query).toArray(function(err, result) {
+        db.collection(dbSettings.collection).find(query).toArray(function(err, result) {
           if (err) {
             return reject(err);
           };
