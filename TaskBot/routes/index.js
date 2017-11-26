@@ -16,6 +16,7 @@ router.get('/callback',function(req,res){
             gitHubId:"",
             email:"",
             login:"",
+            repositories:[]
         };
 
     //TODO:move this code to some middleware.    
@@ -29,20 +30,38 @@ router.get('/callback',function(req,res){
             userObject.gitHubId = userInfo.id,
             userObject.email = userInfo.email,
             userObject.login = userInfo.login,
-            
-            console.log(JSON.stringify(userObject));
-
-            dataAccessObject.insertDocument(userObject).then(function(dbResult){
-                if(dbResult.code === 200){
-                    res.render('successfulAuth');
-                }
-            })
+    
+             git.getUserRepositories(userObject.tocken, userObject.login).then(function(userRepos){
+                
+                userObject.repositories = userRepos;
+                
+                res.render('repos', { pageData:userObject })
+             });   
          });
     }).catch(function(err){
         console.log(err);
     });
 });
 
+router.post('/finsihedIntegration',function(req,res){
+    var data = req.body;
+    if(data !== "" && data !== undefined) {
+        if(utils.isJsonValid(JSON.stringify(data))) {
+             dataAccessObject.insertDocument(data).then(function(dbResult){
+                 if(dbResult.code === 200){
+                     res.send(200);
+                 }
+             }).catch(function(err){
+                 console.log(err);
+             }); 
+        }else {
+             res.send(500);
+        }
+    }else {
+        res.sendStatus(500);
+    }
+ });
+ 
 /* POST recive github webhook. */
 router.post('/',function(req,res){
    var gitHubWebHook,
