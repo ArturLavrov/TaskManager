@@ -1,5 +1,37 @@
 var http = require('../modules/http');
+var dataAccessObject = require('../modules/dataAccessObject');
+
 //WORK
+exports.startPipeline = function(webHook){
+      var commitsInPush = webHook.commits;
+      for(var commit in commitsInPush){
+            
+            var query = { "email" : commit.author.email  };
+            var commitId = commit.id;
+
+            dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
+                  if(dbResult.data.length > 0){
+                      git.getCommitDiff(commitId).then(function(commitDiff){
+                          var todoArray = git.parseCommitDiff(commitDiff);
+                          if(todoArray.length > 0) {
+                              
+                              for(var i = 0; i <= todoArray.length; i++) {
+                                  git.createTask(dbResult.data[0].tocken, todoArray[i]).then(function(code){
+                                      console.log(200);
+                                  });
+                              }
+                          
+                        }
+                      });
+                  } 
+                  else {
+                      return;
+                  }
+              }).catch(function(err){
+                  console.log(err);
+              });
+      }
+}
 exports.getCommitDiff = function(commitId){
       return new Promise(function(resolve,reject){
             var requestUrl = "https://github.com/ArturLavrov/AdaptiveWebSite/commit/" + commitId + ".diff";

@@ -52,38 +52,10 @@ router.post('/',function(req,res){
 
    gitHubWebHook = req.body;
 
-   if(gitHubWebHook === "") {
-      res.render('index', { title: 'Bad webhook body message' });
+   if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
+      return
    }else {
-      if(gitHubWebHook.head_commit.distinct) {
-        
-        authorEmail = gitHubWebHook.commits[0].author.email;
-        commitId = gitHubWebHook.commits[0].id;
-        query = { "email" : authorEmail  }
-
-        dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
-            if(dbResult.data.length > 0){
-                //Move to another method
-                git.getCommitDiff(commitId).then(function(commitDiff){
-                    var resultArray = git.parseCommitDiff(commitDiff);
-                    
-                    if(resultArray.length > 0) {
-                        for(var i = 0; i <= resultArray.length; i++) {
-                            git.createTask(dbResult.data[0].tocken, resultArray[i]).then(function(code){
-                                console.log(200);
-                            });
-                        }
-                    }
-
-                });
-            } 
-            else {
-                return;
-            }
-        }).catch(function(err){
-            console.log(err);
-        });
-      }
+      git.startPipeline(gitHubWebHook);
    }
 });
 module.exports = router;
