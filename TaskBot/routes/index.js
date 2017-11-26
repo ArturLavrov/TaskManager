@@ -16,7 +16,6 @@ router.get('/callback',function(req,res){
             gitHubId:"",
             email:"",
             login:"",
-            repositories:[]
         };
 
     //TODO:move this code to some middleware.    
@@ -30,44 +29,23 @@ router.get('/callback',function(req,res){
             userObject.gitHubId = userInfo.id,
             userObject.email = userInfo.email,
             userObject.login = userInfo.login,
-    
-             git.getUserRepositories(userObject.tocken, userObject.login).then(function(userRepos){
-                
-                userObject.repositories = userRepos;
-                console.log(JSON.stringify(userObject));
-                
-                res.render('repos', { pageData:userObject })
-             });   
+            
+            console.log(JSON.stringify(userObject));
+
+            dataAccessObject.insertDocument(userObject).then(function(dbResult){
+                if(dbResult.code === 200){
+                    res.render('successfulAuth');
+                }
+            })
          });
     }).catch(function(err){
         console.log(err);
     });
 });
 
-
-router.post('/finsihedIntegration',function(req,res){
-   var data = req.body;
-   if(data !== "" && data !== undefined) {
-       if(utils.isJsonValid(JSON.stringify(data))) {
-            dataAccessObject.insertDocument(data).then(function(dbResult){
-                if(dbResult.code === 200){
-                    res.send(200);
-                }
-            }).catch(function(err){
-                console.log(err);
-            }); 
-       }else {
-            res.send(500);
-       }
-   }else {
-       res.sendStatus(500);
-   }
-});
-
 /* POST recive github webhook. */
 router.post('/',function(req,res){
    var gitHubWebHook,
-       repositoryId,
        query,
        authorEmail;
 
@@ -77,13 +55,13 @@ router.post('/',function(req,res){
       res.render('index', { title: 'Bad webhook body message' });
    }else {
       if(gitHubWebHook.head_commit.distinct) {
-        repositoryId = gitHubWebHook.repository.id;
+        authorEmail = gitHubWebHook.commits[0].author.email;
         
-        query = { "repositories.id" : repositoryId  }
+        query = { "user.email" : authorEmail  }
 
         dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
             if(dbResult.data.length > 0){
-                //start processing pipeline here.
+                //start processinipeline here.
             }else {
                 return;
             }
