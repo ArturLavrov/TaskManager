@@ -38,7 +38,7 @@ exports.parseCommitDiff = function(diff){
 };
 //WORK
 exports.getJwtTocken = function(gitHubCode){
-      return new Promise(function(resolve,reject){
+      return new Promise(function(resolve, reject){
             var formData = {
                   client_id: 'Iv1.9b56ab47a227f5d6',
                   client_secret: '73250b0dff85c135ca9ae11dd6db571221b393fd',
@@ -70,13 +70,13 @@ exports.getJwtTocken = function(gitHubCode){
       });
 };
 //WORK
-exports.createTask = function(accessTocken){
-      return new Promise(function(resolve,reject){
+exports.createTask = function(accessTocken, message){
+      return new Promise(function(resolve, reject){
             var tocken = 'token ' + accessTocken;
             
             var task = {
-                  title: 'Test task',
-                  body: 'I\'m having a problem with this',
+                  title: message,
+                  body: '',
             }
             
             var options = {
@@ -90,7 +90,7 @@ exports.createTask = function(accessTocken){
                   json:true,
             } 
       
-            http.post(options).then(function(respose){
+            http.post(options).then(function(response){
                  if(response.statusCode == 200){
                        return resolve(200);
                  }else{

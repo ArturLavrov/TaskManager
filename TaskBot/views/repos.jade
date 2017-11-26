@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  .col-lg-4
+  .col-lg-4
+    ul.list-group
+      each val in pageData.repositories
+        li.list-group-item
+          .checkbox
+            label
+              input(type='checkbox', value='')
+              label !{val.name}
+    button.btn.btn-success(type='button') Finished integration          
+  .col-lg-4
+  script(src='/path')
