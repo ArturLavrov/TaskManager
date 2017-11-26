@@ -1,26 +1,22 @@
 var http = require('../modules/http');
 var dataAccessObject = require('../modules/dataAccessObject');
-
 //WORK
 exports.startPipeline = function(webHook){
       var commitsInPush = webHook.commits;
-      for(var commit in commitsInPush){
-            
+      commitsInPush.forEach(function(commit){
             var query = { "email" : commit.author.email  };
             var commitId = commit.id;
 
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
-                      git.getCommitDiff(commitId).then(function(commitDiff){
-                          var todoArray = git.parseCommitDiff(commitDiff);
+                      getCommitDiff(commitId).then(function(commitDiff){
+                          var todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
-                              
-                              for(var i = 0; i <= todoArray.length; i++) {
-                                  git.createTask(dbResult.data[0].tocken, todoArray[i]).then(function(code){
+                              for(var j = 0; j <= todoArray.length; j++) {
+                                  createTask(dbResult.data[0].tocken, todoArray[j]).then(function(code){
                                       console.log(200);
                                   });
                               }
-                          
                         }
                       });
                   } 
@@ -30,45 +26,8 @@ exports.startPipeline = function(webHook){
               }).catch(function(err){
                   console.log(err);
               });
-      }
+      })
 }
-exports.getCommitDiff = function(commitId){
-      return new Promise(function(resolve,reject){
-            var requestUrl = "https://github.com/ArturLavrov/AdaptiveWebSite/commit/" + commitId + ".diff";
-            
-            var options = {
-                  url: requestUrl, 
-            } 
-
-            http.get(options).then(function(response){
-                  var commitDiff = response.body;
-                  return resolve(commitDiff);
-            }).catch(function(err){
-                 return reject(err);
-            });   
-      });
-} 
-//WORK
-exports.parseCommitDiff = function(diff){
-      var resultDataAray = [];
-      const regex = /\+\s*\/\/TODO(: |:)(\w+[^\n]+)./g;
-      
-      if(diff === ""){
-            return resultDataAray;
-      }
-      let parsedValue;
-      
-      while ((parsedValue = regex.exec(diff)) !== null) {
-          // This is necessary to avoid infinite loops with zero-width matches
-          if (parsedValue.index === regex.lastIndex) {
-              regex.lastIndex++;
-          }
-          console.log(parsedValue[2]);
-          resultDataAray.push(parsedValue[2])
-      }
-      return resultDataAray;
-};
-//WORK
 exports.getJwtTocken = function(gitHubCode){
       return new Promise(function(resolve, reject){
             var formData = {
@@ -101,39 +60,6 @@ exports.getJwtTocken = function(gitHubCode){
             });
       });
 };
-//WORK
-exports.createTask = function(accessTocken, message){
-      return new Promise(function(resolve, reject){
-            var tocken = 'token ' + accessTocken;
-            
-            var task = {
-                  title: message,
-                  body: '',
-            }
-            
-            var options = {
-                  url:'https://api.github.com/repos/ArturLavrov/AdaptiveWebSite/issues', 
-                  headers:{
-                        'Authorization': tocken,
-                        'User-Agent': "//TODO's Manager",
-                        'Accept':'application/vnd.github.machine-man-preview+json'
-                  },
-                  body:task,
-                  json:true,
-            } 
-      
-            http.post(options).then(function(response){
-                 if(response.statusCode == 200){
-                       return resolve(200);
-                 }else{
-                       return reject(response.message);
-                 }
-            }).catch(function(err){
-                  return reject(err);
-            });
-      })
-};
-//WORK
 exports.getUserInfo = function(jwtTocken){
     return new Promise(function(resolve,reject){
       var tocken = 'token ' + jwtTocken;
@@ -160,7 +86,6 @@ exports.getUserInfo = function(jwtTocken){
       });
     });
 }
-//WORK
 exports.getUserRepositories = function(jwtTocken, gitHubUserName){
   return new Promise(function(resolve,reject){
       var options = {
@@ -196,3 +121,70 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
       });
   })
 }
+
+getCommitDiff = function(commitId){
+      return new Promise(function(resolve,reject){
+            var requestUrl = "https://github.com/ArturLavrov/AdaptiveWebSite/commit/" + commitId + ".diff";
+            
+            var options = {
+                  url: requestUrl, 
+            } 
+
+            http.get(options).then(function(response){
+                  var commitDiff = response.body;
+                  return resolve(commitDiff);
+            }).catch(function(err){
+                 return reject(err);
+            });   
+      });
+} 
+parseCommitDiff = function(diff){
+      var resultDataAray = [];
+      const regex = /\+\s*\/\/TODO(: |:)(\w+[^\n]+)./g;
+      
+      if(diff === ""){
+            return resultDataAray;
+      }
+      let parsedValue;
+      
+      while ((parsedValue = regex.exec(diff)) !== null) {
+          // This is necessary to avoid infinite loops with zero-width matches
+          if (parsedValue.index === regex.lastIndex) {
+              regex.lastIndex++;
+          }
+          console.log(parsedValue[2]);
+          resultDataAray.push(parsedValue[2])
+      }
+      return resultDataAray;
+};
+createTask = function(accessTocken, message){
+      return new Promise(function(resolve, reject){
+            var tocken = 'token ' + accessTocken;
+            
+            var task = {
+                  title: message,
+                  body: '',
+            }
+            
+            var options = {
+                  url:'https://api.github.com/repos/ArturLavrov/AdaptiveWebSite/issues', 
+                  headers:{
+                        'Authorization': tocken,
+                        'User-Agent': "//TODO's Manager",
+                        'Accept':'application/vnd.github.machine-man-preview+json'
+                  },
+                  body:task,
+                  json:true,
+            } 
+      
+            http.post(options).then(function(response){
+                 if(response.statusCode == 200){
+                       return resolve(200);
+                 }else{
+                       return reject(response.message);
+                 }
+            }).catch(function(err){
+                  return reject(err);
+            });
+      })
+};
