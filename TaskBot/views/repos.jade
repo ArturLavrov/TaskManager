@@ -11,18 +11,44 @@ block content
               label
                 input(type='checkbox', data-rep=val)
                 label !{val.name}
-      button.btn.btn-success(type='button') Finished integration          
+      button.btn.btn-success(type='button' id="submit_btn") Finished integration          
   .col-lg-4
   script.
-    var selectedRepos = [];
+    var user = {
+         tocken: "",
+         githubId: "",
+         email: "",
+         login: "",
+         repositories: [],
+       };
     $('#reposForm :checkbox').change(function() {
     if (this.checked) {
         var repoData = $(this).data("rep");
-        selectedRepos.push(repoData);
+        user.repositories.push(repoData);
     } else {
         var repoData = $(this).data("rep");
-        var index = selectedRepos.indexOf(repoData);
-        selectedRepos.splice(index,1);
+        var index = user.repositories.indexOf(repoData);
+        user.repositories.splice(index,1);
     }
     });
+    $('#submit_btn').click(function(){
+        user.tocken = "#{pageData.tocken}",
+        user.gitHubId = "#{pageData.gitHubId}",
+        user.email = "#{pageData.email}",
+        user.login = "#{pageData.login}",
+       console.log(user);
+       $.ajax({
+        url: "/finsihedIntegration",
+        method: "POST",
+        data: user,
+        success:function(code) {
+           if(code === 200){
+             console.log("success")
+           }
+        },
+        error:function(){
+          alert("error");
+        }
+      });
+    })
     
