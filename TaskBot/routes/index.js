@@ -71,8 +71,7 @@ router.post('/',function(req,res){
        query,
        commitId,
        authorEmail;
-
-   gitHubWebHook = req.body;
+gitHubWebHook = req.body;
 
    if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
       return
