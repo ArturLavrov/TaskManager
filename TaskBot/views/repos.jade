@@ -3,13 +3,55 @@ extends layout
 block content
   .col-lg-4
   .col-lg-4
-    ul.list-group
-      each val in pageData.repositories
-        li.list-group-item
-          .checkbox
-            label
-              input(type='checkbox', value='')
-              label !{val.name}
-    button.btn.btn-success(type='button') Finished integration          
+    form#reposForm
+      ul.list-group
+        each val in pageData.repositories
+          li.list-group-item
+            .checkbox
+              label
+                input(type='checkbox', data-rep=val)
+                label !{val.name}
+      button.btn.btn-success(type='button' id="submit_btn") Finished integration          
   .col-lg-4
-  script(src='/path')
+  script.
+    var user = {
+         tocken: "",
+         githubId: "",
+         email: "",
+         login: "",
+         repositories: [],
+       };
+    $('#reposForm :checkbox').change(function() {
+    if (this.checked) {
+        var repoData = $(this).data("rep");
+        console.log(repoData);
+        user.repositories.push(repoData);
+    } else {
+        var repoData = $(this).data("rep");
+        var index = user.repositories.indexOf(repoData);
+        user.repositories.splice(index,1);
+    }
+    });
+    $('#submit_btn').click(function(){
+        user.tocken = "#{pageData.tocken}",
+        user.githubId = "#{pageData.gitHubId}",
+        user.email = "#{pageData.email}",
+        user.login = "#{pageData.login}",
+       console.log(user);
+       $.ajax({
+        url: "/finsihedIntegration",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        method: "POST",
+        data: JSON.stringify(user),
+        success:function(code) {
+           if(code === 200){
+             console.log("success")
+           }
+        },
+        error:function(err){
+          alert("error");
+        }
+      });
+    })
+    
