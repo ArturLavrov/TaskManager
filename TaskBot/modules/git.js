@@ -4,9 +4,11 @@ var dataAccessObject = require('../modules/dataAccessObject');
 exports.startPipeline = function(webHook){
       var commitsInPush = webHook.commits;
       commitsInPush.forEach(function(commit){
-            var query = { "email" : commit.author.email  };
+            repositoryId = webHook.repository.id;
+            
+            var query = { "repositories.id" : repositoryId  }
             var commitId = commit.id;
-
+            
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
                       getCommitDiff(commitId).then(function(commitDiff){

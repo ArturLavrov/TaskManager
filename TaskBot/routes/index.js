@@ -7,6 +7,7 @@ var utils = require('../modules/utils');
 router.get('/', function(req, res, next) { 
     res.sendfile("views/index.html");  
 });
+
 /* GET recive github auth callbach. */
 router.get('/callback',function(req,res){
     var gitHubCode = req.query.code,
@@ -43,6 +44,7 @@ router.get('/callback',function(req,res){
     });
 });
 
+/* POST finishedIntegration. */
 router.post('/finsihedIntegration',function(req,res){
     var data = req.body;
     if(data !== "" && data !== undefined) {
@@ -63,6 +65,7 @@ router.post('/finsihedIntegration',function(req,res){
  });
  
 /* POST recive github webhook. */
+
 router.post('/',function(req,res){
    var gitHubWebHook,
        query,
