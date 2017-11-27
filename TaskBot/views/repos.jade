@@ -24,6 +24,7 @@ block content
     $('#reposForm :checkbox').change(function() {
     if (this.checked) {
         var repoData = $(this).data("rep");
+        console.log(repoData);
         user.repositories.push(repoData);
     } else {
         var repoData = $(this).data("rep");
@@ -33,20 +34,22 @@ block content
     });
     $('#submit_btn').click(function(){
         user.tocken = "#{pageData.tocken}",
-        user.gitHubId = "#{pageData.gitHubId}",
+        user.githubId = "#{pageData.gitHubId}",
         user.email = "#{pageData.email}",
         user.login = "#{pageData.login}",
        console.log(user);
        $.ajax({
         url: "/finsihedIntegration",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
         method: "POST",
-        data: user,
+        data: JSON.stringify(user),
         success:function(code) {
            if(code === 200){
              console.log("success")
            }
         },
-        error:function(){
+        error:function(err){
           alert("error");
         }
       });
