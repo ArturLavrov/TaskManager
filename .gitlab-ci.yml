@@ -1,11 +1,18 @@
 image: node:6
 
+cache:
+  paths:
+  - TaskBot/node_modules
+
 stages:
   - build
   - test
   - deploy
 
-job1:
+build_project:
   stage: build
   script:
     - npm --prefix Taskbot build
+  only:
+    - master
+
