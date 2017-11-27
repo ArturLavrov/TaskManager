@@ -16,3 +16,27 @@ build_project:
   only:
     - master
 
+deploy_staging:
+  stage: deploy
+  script:
+    - git remote add heroku https://heroku:$da6149a2-cc16-43ec-bb4e-dcb050cdaf27@git.heroku.com/todo-manager-staging.git
+    - git push heroku master
+    - echo "Deployed to staging server"
+  environment:
+  name: staging
+  url: https://todo-manager-staging.herokuapp.com/
+  only:
+    - master
+
+deploy_prod:
+  stage: deploy
+  script:
+    - git remote add heroku https://heroku:$da6149a2-cc16-43ec-bb4e-dcb050cdaf27@git.heroku.com/todo-manager-production.git
+    - git push heroku master
+    - echo "Deploy to production server"
+  environment:
+    name: production
+    url: https://todo-manager-production.herokuapp.com/
+  when: manual
+  only:
+    - production
