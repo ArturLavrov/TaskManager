@@ -1,12 +1,3 @@
-before_script:
-  - npm install TaskBot
-
-# This folder is cached between builds
-# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
-cache:
-  paths:
-    - TaskBot/node_modules/
-
 stages:
   - build
   - test
