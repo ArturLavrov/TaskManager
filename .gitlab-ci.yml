@@ -23,8 +23,8 @@ deploy_staging:
     - git push heroku master
     - echo "Deployed to staging server"
   environment:
-  name: staging
-  url: https://todo-manager-staging.herokuapp.com/
+      name: staging
+      url: https://todo-manager-staging.herokuapp.com/
   only:
     - master
 
@@ -35,8 +35,8 @@ deploy_prod:
     - git push heroku master
     - echo "Deploy to production server"
   environment:
-    name: production
-    url: https://todo-manager-production.herokuapp.com/
+      name: production
+      url: https://todo-manager-production.herokuapp.com/
   when: manual
   only:
     - production
