@@ -1,3 +1,5 @@
+image: node:6
+
 stages:
   - build
   - test
@@ -6,4 +8,4 @@ stages:
 job1:
   stage: build
   script:
-    - npm build TaskBot
+    - npm --prefix Taskbot build
