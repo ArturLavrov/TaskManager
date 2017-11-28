@@ -19,7 +19,7 @@ build_project:
 deploy_staging:
   stage: deploy
   script:
-    - git remote add heroku https://heroku:[da6149a2-cc16-43ec-bb4e-dcb050cdaf27]git.heroku.com/todo-manager-staging.git 
+    - git remote add heroku https://heroku:da6149a2-cc16-43ec-bb4e-dcb050cdaf27git.heroku.com/todo-manager-staging.git 
     - git push heroku master
     - echo "Deployed to staging server"
   environment:
