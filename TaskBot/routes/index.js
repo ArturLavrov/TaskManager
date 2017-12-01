@@ -40,7 +40,7 @@ router.get('/callback',function(req,res){
              });   
          });
     }).catch(function(err){
-        console.log(err);
+          console.log(err);
     });
 });
 
@@ -76,7 +76,10 @@ gitHubWebHook = req.body;
    if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
       return
    }else {
-      git.startPipeline(gitHubWebHook);
+      var pipeLineResult = git.startPipeline(gitHubWebHook);
+      if(!pipeLineResult.code === 200){
+          console.log(pipeLineResult);   
+      }
    }
 });
 module.exports = router;

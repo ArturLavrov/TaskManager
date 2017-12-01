@@ -15,18 +15,29 @@ exports.startPipeline = function(webHook){
                           var todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
                               for(var j = 0; j <= todoArray.length; j++) {
-                                  createTask(dbResult.data[0].tocken, todoArray[j]).then(function(code){
-                                      console.log(200);
+                                  createTask(dbResult.data[0].tocken, todoArray[j]).then(function(){
+                                    return {
+                                          code: 200,
+                                          message:"Task was successfuly created",
+                                    }
                                   });
                               }
                         }
                       });
                   } 
                   else {
-                      return;
+                      return {
+                            code: 404,
+                            message:"User not found in DB"      
+                      }
                   }
               }).catch(function(err){
-                  console.log(err);
+                  throw {
+                        code:500,
+                        name: 'MongoDB Error',
+                        message: "Something had happend when 'getDocumentByQuery(query)' start executed",
+                        extra: err
+                  }
               });
       })
 }
@@ -47,18 +58,12 @@ exports.getJwtTocken = function(gitHubCode){
             }
 
             http.post(options).then(function(response){
-                  var jsonObj;
-                        
-                  try{
-                        jsonObj = JSON.parse(response.body);
-                  }catch(e){
-                        return reject(e);
-                  }
-                        
-                  var access_token = jsonObj.access_token;
+                  var jsonObj, access_token;
+
+                  jsonObj = JSON.parse(response.body);      
+                  access_token = jsonObj.access_token;
+
                   return resolve(access_token);
-            }).catch(function(err){
-                  return reject(err);
             });
       });
 };
@@ -75,16 +80,9 @@ exports.getUserInfo = function(jwtTocken){
             },
       }
       http.get(options).then(function(response){
-           var userInfo
-           try{
-                 userInfo = JSON.parse(response.body);
-           }catch(e){
-                 return reject(e);
-           };
-           
+           var userInfo;
+           userInfo = JSON.parse(response.body);
            return resolve(userInfo);
-      }).catch(function(err){
-            return reject(err);
       });
     });
 }
@@ -102,11 +100,8 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
             var userRepositories = [];
             var userRepositoriesApiResponse;
 
-           try{
-                 userRepositoriesApiResponse = JSON.parse(response.body);
-           }catch(e){
-                 return reject(e);
-           };
+            userRepositoriesApiResponse = JSON.parse(response.body);
+          
            userRepositoriesApiResponse.forEach(function(repository){
                   userRepositories.push(
                         {
@@ -118,8 +113,6 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
                   );
             })
             return resolve(userRepositories);
-      }).catch(function(err){
-            return reject(err);
       });
   })
 }
@@ -135,9 +128,7 @@ getCommitDiff = function(commitId){
             http.get(options).then(function(response){
                   var commitDiff = response.body;
                   return resolve(commitDiff);
-            }).catch(function(err){
-                 return reject(err);
-            });   
+            });  
       });
 } 
 parseCommitDiff = function(diff){
@@ -180,13 +171,12 @@ createTask = function(accessTocken, message){
             } 
       
             http.post(options).then(function(response){
-                 if(response.statusCode == 200){
-                       return resolve(200);
-                 }else{
-                       return reject(response.message);
+                 if(!response.statusCode === 200){
+                       throw {
+                             code:500,
+                             message:"Something had happend when try to create task",
+                       }
                  }
-            }).catch(function(err){
-                  return reject(err);
             });
       })
 };
