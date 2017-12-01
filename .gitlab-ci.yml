@@ -27,7 +27,7 @@ deploy_staging:
   script:
     - cd TaskBot
     - git remote add heroku https://heroku:$HEROKU_STAGING_API_KEY@git.heroku.com/todo-manager-staging.git
-    - git push -f heroku master
+    - git push heroku `git subtree split --prefix TaskBot master`:master --force
     - echo "Deployed to staging server"
   environment:
       name: staging
