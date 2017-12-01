@@ -22,6 +22,7 @@ test_project:
   stage: test
   script:
     - echo "Run project tests"
+    
 deploy_staging:
   stage: deploy
   script:
