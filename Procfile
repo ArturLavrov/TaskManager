@@ -1,1 +1,1 @@
-web: node bin/www
+web: npm --prefix Taskbot start
