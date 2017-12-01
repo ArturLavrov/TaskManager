@@ -25,6 +25,7 @@ test_project:
 deploy_staging:
   stage: deploy
   script:
+    - cd TaskBot
     - git remote add heroku https://heroku:$HEROKU_STAGING_API_KEY@git.heroku.com/todo-manager-staging.git
     - git push -f heroku master
     - echo "Deployed to staging server"
