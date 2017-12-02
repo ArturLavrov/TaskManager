@@ -70,16 +70,22 @@ router.post('/',function(req,res){
    var gitHubWebHook,
        query,
        commitId,
+       pipeLineResult,
        authorEmail;
-gitHubWebHook = req.body;
+    
+       gitHubWebHook = req.body;
 
    if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
       return
-   }else {
-      var pipeLineResult = git.startPipeline(gitHubWebHook);
-      if(!pipeLineResult.code === 200){
-          console.log(pipeLineResult);   
-      }
+   } else {
+     try{
+        pipeLineResult = git.startPipeline(gitHubWebHook);
+     }
+     catch(err){
+        if(!pipeLineResult.code === 200){
+            console.log(pipeLineResult);   
+        }
+     }
    }
 });
 module.exports = router;

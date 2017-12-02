@@ -6,8 +6,15 @@ exports.startPipeline = function(webHook){
       commitsInPush.forEach(function(commit){
             repositoryId = webHook.repository.id;
             
-            var query = { "repositories.id" : repositoryId  }
+            //var query = [ { 'repositories.id': repositoryId },
+                          //{ 'repositories.$': 1, 'email': 1, 'tocken': 1, 'githubid':1, 'login':1 }
+            //];
+                  
             var commitId = commit.id;
+            var pipelineResult = {
+                  code: 0,
+                  message: "",
+            };
             
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
@@ -15,21 +22,19 @@ exports.startPipeline = function(webHook){
                           var todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
                               for(var j = 0; j <= todoArray.length; j++) {
-                                  createTask(dbResult.data[0].tocken, todoArray[j]).then(function(){
-                                    return {
-                                          code: 200,
-                                          message:"Task was successfuly created",
-                                    }
+                                  createTask(dbResult.data[0].tocken, todoArray[j], dbResult.data[0].repositories[0].url).then(function(){
+                                    pipelineResult.code = 200;
+                                    pipelineResult.message = "Task was successfuly created";
+                                    return pipelineResult;
                                   });
                               }
                         }
                       });
                   } 
                   else {
-                      return {
-                            code: 404,
-                            message:"User not found in DB"      
-                      }
+                        pipelineResult.code = 404,
+                        message = "User not found"
+                        return pipelineResult;
                   }
               }).catch(function(err){
                   throw {
@@ -150,7 +155,7 @@ parseCommitDiff = function(diff){
       }
       return resultDataAray;
 };
-createTask = function(accessTocken, message){
+createTask = function(accessTocken, message, repositoryUrl){
       return new Promise(function(resolve, reject){
             var tocken = 'token ' + accessTocken;
             
@@ -160,7 +165,7 @@ createTask = function(accessTocken, message){
             }
             
             var options = {
-                  url:'https://api.github.com/repos/ArturLavrov/AdaptiveWebSite/issues', 
+                  url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
                   headers:{
                         'Authorization': tocken,
                         'User-Agent': "//TODO's Manager",
