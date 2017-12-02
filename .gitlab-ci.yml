@@ -17,12 +17,18 @@ build_project:
     - npm --prefix Taskbot build
   only:
     - master
-
+test_project:
+  stage: test
+  script:
+    - echo "Run project tests"
+  only:
+    - master
+    
 deploy_staging:
   stage: deploy
   script:
     - git remote add heroku https://heroku:$HEROKU_STAGING_API_KEY@git.heroku.com/todo-manager-staging.git
-    - git push -f heroku master
+    - git subtree push --prefix TaskBot heroku master
     - echo "Deployed to staging server"
   environment:
       name: staging
