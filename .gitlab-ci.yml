@@ -6,7 +6,6 @@ cache:
 variables:
   HEROKU_STAGING_API_KEY: "da6149a2-cc16-43ec-bb4e-dcb050cdaf27"
   HEROKU_PRODUCTION_API_KEY: ""
-
 stages:
   - build
   - test
