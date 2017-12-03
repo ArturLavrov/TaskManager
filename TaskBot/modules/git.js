@@ -19,7 +19,7 @@ exports.startPipeline = function(webHook){
                       getCommitDiff(commitId).then(function(commitDiff){
                           var todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
-                              for(var j = 0; j <= todoArray.length; j++) {
+                              for(var j = 0; j < todoArray.length; j++) {
                                   createTask(dbResult.data[0].tocken, todoArray[j], dbResult.data[0].repositories[0].url).then(function(){
                                     pipelineResult.code = 200;
                                     pipelineResult.message = "Task was successfuly created";
