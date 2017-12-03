@@ -36,7 +36,7 @@ exports.getDocumentByQuery = function(query) {
         if (err) {
           return reject(err);
         };
-        db.collection(config.database.collection).find(query).toArray(function(err, result) {
+        db.collection(config.database.collection).find({ 'repositories.id': query.repositoryID },{ 'repositories.$': 1, 'email': 1, 'tocken': 1, 'githubid':1, 'login':1 }).toArray(function(err, result) {
           if (err) {
             return reject(err);
           };

@@ -6,27 +6,41 @@ exports.startPipeline = function(webHook){
       commitsInPush.forEach(function(commit){
             repositoryId = webHook.repository.id;
             
-            var query = { "repositories.id" : repositoryId  }
+            var query = { repositoryID: repositoryId };
+                  
             var commitId = commit.id;
+            var pipelineResult = {
+                  code: 0,
+                  message: "",
+            };
             
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
                       getCommitDiff(commitId).then(function(commitDiff){
                           var todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
-                              for(var j = 0; j <= todoArray.length; j++) {
-                                  createTask(dbResult.data[0].tocken, todoArray[j]).then(function(code){
-                                      console.log(200);
+                              for(var j = 0; j < todoArray.length; j++) {
+                                  createTask(dbResult.data[0].tocken, todoArray[j], dbResult.data[0].repositories[0].url).then(function(){
+                                    pipelineResult.code = 200;
+                                    pipelineResult.message = "Task was successfuly created";
+                                    return pipelineResult;
                                   });
                               }
                         }
                       });
                   } 
                   else {
-                      return;
+                        pipelineResult.code = 404,
+                        message = "User not found"
+                        return pipelineResult;
                   }
               }).catch(function(err){
-                  console.log(err);
+                  throw {
+                        code:500,
+                        name: 'MongoDB Error',
+                        message: "Something had happend when 'getDocumentByQuery(query)' start executed",
+                        extra: err
+                  }
               });
       })
 }
@@ -47,18 +61,12 @@ exports.getJwtTocken = function(gitHubCode){
             }
 
             http.post(options).then(function(response){
-                  var jsonObj;
-                        
-                  try{
-                        jsonObj = JSON.parse(response.body);
-                  }catch(e){
-                        return reject(e);
-                  }
-                        
-                  var access_token = jsonObj.access_token;
+                  var jsonObj, access_token;
+
+                  jsonObj = JSON.parse(response.body);      
+                  access_token = jsonObj.access_token;
+
                   return resolve(access_token);
-            }).catch(function(err){
-                  return reject(err);
             });
       });
 };
@@ -75,16 +83,9 @@ exports.getUserInfo = function(jwtTocken){
             },
       }
       http.get(options).then(function(response){
-           var userInfo
-           try{
-                 userInfo = JSON.parse(response.body);
-           }catch(e){
-                 return reject(e);
-           };
-           
+           var userInfo;
+           userInfo = JSON.parse(response.body);
            return resolve(userInfo);
-      }).catch(function(err){
-            return reject(err);
       });
     });
 }
@@ -102,11 +103,8 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
             var userRepositories = [];
             var userRepositoriesApiResponse;
 
-           try{
-                 userRepositoriesApiResponse = JSON.parse(response.body);
-           }catch(e){
-                 return reject(e);
-           };
+            userRepositoriesApiResponse = JSON.parse(response.body);
+          
            userRepositoriesApiResponse.forEach(function(repository){
                   userRepositories.push(
                         {
@@ -118,8 +116,6 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
                   );
             })
             return resolve(userRepositories);
-      }).catch(function(err){
-            return reject(err);
       });
   })
 }
@@ -135,9 +131,7 @@ getCommitDiff = function(commitId){
             http.get(options).then(function(response){
                   var commitDiff = response.body;
                   return resolve(commitDiff);
-            }).catch(function(err){
-                 return reject(err);
-            });   
+            });  
       });
 } 
 parseCommitDiff = function(diff){
@@ -159,7 +153,7 @@ parseCommitDiff = function(diff){
       }
       return resultDataAray;
 };
-createTask = function(accessTocken, message){
+createTask = function(accessTocken, message, repositoryUrl){
       return new Promise(function(resolve, reject){
             var tocken = 'token ' + accessTocken;
             
@@ -169,7 +163,7 @@ createTask = function(accessTocken, message){
             }
             
             var options = {
-                  url:'https://api.github.com/repos/ArturLavrov/AdaptiveWebSite/issues', 
+                  url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
                   headers:{
                         'Authorization': tocken,
                         'User-Agent': "//TODO's Manager",
@@ -180,13 +174,12 @@ createTask = function(accessTocken, message){
             } 
       
             http.post(options).then(function(response){
-                 if(response.statusCode == 200){
-                       return resolve(200);
-                 }else{
-                       return reject(response.message);
+                 if(response.statusCode !== 200){
+                       throw {
+                             code:500,
+                             message:"Something had happend when try to create task",
+                       }
                  }
-            }).catch(function(err){
-                  return reject(err);
             });
       })
 };
