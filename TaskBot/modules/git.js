@@ -6,9 +6,7 @@ exports.startPipeline = function(webHook){
       commitsInPush.forEach(function(commit){
             repositoryId = webHook.repository.id;
             
-            //var query = [ { 'repositories.id': repositoryId },
-                          //{ 'repositories.$': 1, 'email': 1, 'tocken': 1, 'githubid':1, 'login':1 }
-            //];
+            var query = { repositoryID: repositoryId };
                   
             var commitId = commit.id;
             var pipelineResult = {
@@ -176,7 +174,7 @@ createTask = function(accessTocken, message, repositoryUrl){
             } 
       
             http.post(options).then(function(response){
-                 if(!response.statusCode === 200){
+                 if(response.statusCode !== 200){
                        throw {
                              code:500,
                              message:"Something had happend when try to create task",
