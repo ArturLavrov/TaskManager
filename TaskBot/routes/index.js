@@ -4,9 +4,9 @@ var dataAccessObject = require('../modules/dataAccessObject');
 var utils = require('../modules/utils');
 
 /* GET home page. */
-router.get('/', function(req, res, next) { 
-    res.sendfile("views/index.html");  
-});
+router.get('/', function(req, res) {
+    res.send("index.html");
+ });
 
 /* GET recive github auth callbach. */
 router.get('/callback',function(req,res){

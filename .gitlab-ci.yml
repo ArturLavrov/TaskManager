@@ -3,7 +3,9 @@ image: node:6
 cache:
   paths:
   - TaskBot/node_modules
-
+variables:
+  HEROKU_STAGING_API_KEY: "da6149a2-cc16-43ec-bb4e-dcb050cdaf27"
+  HEROKU_PRODUCTION_API_KEY: ""
 stages:
   - build
   - test
@@ -19,11 +21,14 @@ test_project:
   stage: test
   script:
     - echo "Run project tests"
+  only:
+    - master
+    
 deploy_staging:
   stage: deploy
   script:
-    - git remote add heroku https://heroku:da6149a2-cc16-43ec-bb4e-dcb050cdaf27git.heroku.com/todo-manager-staging.git 
-    - git push heroku master
+    - git remote add heroku https://heroku:$HEROKU_STAGING_API_KEY@git.heroku.com/todo-manager-staging.git
+    - git subtree push --prefix TaskBot heroku master
     - echo "Deployed to staging server"
   environment:
       name: staging
