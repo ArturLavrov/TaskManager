@@ -51,7 +51,11 @@ router.post('/finsihedIntegration',function(req,res){
         if(utils.isJsonValid(JSON.stringify(data))) {
              dataAccessObject.insertDocument(data).then(function(dbResult){
                  if(dbResult.code === 200){
-                     res.send(200);
+                     var serverResponse = {
+                         code: 200,
+                         message: "Successfuly compleat integration",
+                     }
+                     res.send(serverResponse);
                  }
              }).catch(function(err){
                  console.log(err);
