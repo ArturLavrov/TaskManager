@@ -82,9 +82,7 @@ router.post('/',function(req,res){
         pipeLineResult = git.startPipeline(gitHubWebHook);
      }
      catch(err){
-        if(!pipeLineResult.code === 200){
-            console.log(pipeLineResult);   
-        }
+        console.log(err);
      }
    }
 });
