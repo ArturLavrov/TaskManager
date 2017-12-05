@@ -2,22 +2,28 @@ var http = require('../modules/http');
 var dataAccessObject = require('../modules/dataAccessObject');
 //WORK
 exports.startPipeline = function(webHook){
-      var commitsInPush = webHook.commits;
+      var commitsInPush,
+      repositoryId,
+      query,
+      commitId,
+      todoArray,
+      //TODO:create module that contains all Result or throw objects. For example apiResponce.UserNotFound;
+      pipelineResult = {
+            code: 0,
+            message: ""
+      };
+      
+      commitsInPush = webHook.commits;
       commitsInPush.forEach(function(commit){
+
             repositoryId = webHook.repository.id;
-            
-            var query = { repositoryID: repositoryId };
-                  
-            var commitId = commit.id;
-            var pipelineResult = {
-                  code: 0,
-                  message: "",
-            };
+            query = { repositoryID: repositoryId };
+            commitId = commit.id;
             
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
                       getCommitDiff(commitId).then(function(commitDiff){
-                          var todoArray = parseCommitDiff(commitDiff);
+                          todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
                               for(var j = 0; j < todoArray.length; j++) {
                                   createTask(dbResult.data[0].tocken, todoArray[j], dbResult.data[0].repositories[0].url).then(function(){
@@ -26,6 +32,8 @@ exports.startPipeline = function(webHook){
                                     return pipelineResult;
                                   });
                               }
+                        } else{
+                             return; 
                         }
                       });
                   } 

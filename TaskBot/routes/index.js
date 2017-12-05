@@ -52,6 +52,8 @@ router.post('/finsihedIntegration',function(req,res){
              dataAccessObject.insertDocument(data).then(function(dbResult){
                  if(dbResult.code === 200){
                      res.send(200);
+                 }else{
+                     res.send(500);
                  }
              }).catch(function(err){
                  console.log(err);
@@ -76,7 +78,10 @@ router.post('/',function(req,res){
        gitHubWebHook = req.body;
 
    if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
-      return
+      res.send({
+          code: 500,
+          message: "Incorrect web-hook"
+      })
    } else {
      try{
         pipeLineResult = git.startPipeline(gitHubWebHook);
