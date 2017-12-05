@@ -28,9 +28,7 @@ exports.startPipeline = function(webHook){
                           if(todoArray.length > 0) {
                               for(var j = 0; j < todoArray.length; j++) {
                                   createTask(dbResult.data[0].tocken, todoArray[j], dbResult.data[0].repositories[0].url).then(function(){
-                                    pipelineResult.code = 200;
-                                    pipelineResult.message = "Task was successfuly created";
-                                    return pipelineResult;
+                                    return apiResponce.gitHub.taskSuccessfulyCreated();
                                   });
                               }
                         } else{
@@ -39,17 +37,10 @@ exports.startPipeline = function(webHook){
                       });
                   } 
                   else {
-                        pipelineResult.code = 404,
-                        message = "User not found"
-                        return pipelineResult;
+                        return apiResponce.mongoDB.recordNotFound();
                   }
               }).catch(function(err){
-                  throw {
-                        code:500,
-                        name: 'MongoDB Error',
-                        message: "Something had happend when 'getDocumentByQuery(query)' start executed",
-                        extra: err
-                  }
+                  throw apiResponce.mongoDB.error();
               });
       })
 }
@@ -184,10 +175,7 @@ createTask = function(accessTocken, message, repositoryUrl){
       
             http.post(options).then(function(response){
                  if(response.statusCode !== 200){
-                       throw {
-                             code:500,
-                             message:"Something had happend when try to create task",
-                       }
+                       throw apiResponce.gitHub.failedToCreateTask();
                  }
             });
       })

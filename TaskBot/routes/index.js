@@ -2,6 +2,7 @@ var router = require('express').Router();
 var git = require('../modules/git');
 var dataAccessObject = require('../modules/dataAccessObject');
 var utils = require('../modules/utils');
+var apiResponse = require('../modules/apiResponses');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -78,10 +79,7 @@ router.post('/',function(req,res){
        gitHubWebHook = req.body;
 
    if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
-      res.send({
-          code: 500,
-          message: "Incorrect web-hook"
-      })
+      res.send(apiResponse.gitHub.incorrectWebHook())
    } else {
      try{
         pipeLineResult = git.startPipeline(gitHubWebHook);

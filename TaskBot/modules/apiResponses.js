@@ -23,13 +23,12 @@ exports.gitHub.incorrectWebHook = function(){
 }
 exports.mongoDB = {};
 exports.mongoDB.error = function(error){
-    var response = {
+   return {
         code:500,
         name:"MongoDB Error",
         message: "Something bad happend when 'getDocumentByQuery(query)' start executed",
         error:error
     }
-    return response;
 }
 exports.mongoDB.recordNotFound = function(){
     var response = {
