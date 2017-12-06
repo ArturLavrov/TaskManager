@@ -1,18 +1,13 @@
 var http = require('../modules/http');
 var dataAccessObject = require('../modules/dataAccessObject');
 var apiResponce = require('../modules/apiResponses');
-//WORK
+
 exports.startPipeline = function(webHook){
       var commitsInPush,
       repositoryId,
       query,
       commitId,
       todoArray,
-      //TODO:create module that contains all Result or throw objects. For example apiResponce.UserNotFound;
-      pipelineResult = {
-            code: 0,
-            message: ""
-      };
 
       commitsInPush = webHook.commits;
       commitsInPush.forEach(function(commit){
@@ -93,10 +88,7 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
   return new Promise(function(resolve,reject){
       var options = {
             url:'https://api.github.com/users/'+ gitHubUserName + '/repos',
-            headers:{
-                  'User-Agent': "//TODO's Manager",
-                  'Accept':'application/vnd.github.machine-man-preview+json'
-            }, 
+            headers:http.getRepositoryHeaders(), 
       }
 
       http.get(options).then(function(response){
@@ -164,11 +156,7 @@ createTask = function(accessTocken, message, repositoryUrl){
             
             var options = {
                   url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
-                  headers:{
-                        'Authorization': tocken,
-                        'User-Agent': "//TODO's Manager",
-                        'Accept':'application/vnd.github.machine-man-preview+json'
-                  },
+                  headers: http.getCreateTaskHeaders(),
                   body:task,
                   json:true,
             } 
