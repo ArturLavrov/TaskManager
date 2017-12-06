@@ -2,6 +2,7 @@ var router = require('express').Router();
 var git = require('../modules/git');
 var dataAccessObject = require('../modules/dataAccessObject');
 var utils = require('../modules/utils');
+var apiResponse = require('../modules/apiResponses');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -52,6 +53,8 @@ router.post('/finsihedIntegration',function(req,res){
              dataAccessObject.insertDocument(data).then(function(dbResult){
                  if(dbResult.code === 200){
                      res.send(200);
+                 }else{
+                     res.send(500);
                  }
              }).catch(function(err){
                  console.log(err);
@@ -76,15 +79,13 @@ router.post('/',function(req,res){
        gitHubWebHook = req.body;
 
    if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
-      return
+      res.send(apiResponse.gitHub.incorrectWebHook())
    } else {
      try{
         pipeLineResult = git.startPipeline(gitHubWebHook);
      }
      catch(err){
-        if(!pipeLineResult.code === 200){
-            console.log(pipeLineResult);   
-        }
+        console.log(err);
      }
    }
 });

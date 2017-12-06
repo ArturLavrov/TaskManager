@@ -1,46 +1,41 @@
 var http = require('../modules/http');
 var dataAccessObject = require('../modules/dataAccessObject');
-//WORK
+var apiResponce = require('../modules/apiResponses');
+
 exports.startPipeline = function(webHook){
-      var commitsInPush = webHook.commits;
+      var commitsInPush,
+      repositoryId,
+      query,
+      commitId,
+      todoArray,
+
+      commitsInPush = webHook.commits;
       commitsInPush.forEach(function(commit){
+
             repositoryId = webHook.repository.id;
-            
-            var query = { repositoryID: repositoryId };
-                  
-            var commitId = commit.id;
-            var pipelineResult = {
-                  code: 0,
-                  message: "",
-            };
+            query = { repositoryID: repositoryId };
+            commitId = commit.id;
             
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
                       getCommitDiff(commitId).then(function(commitDiff){
-                          var todoArray = parseCommitDiff(commitDiff);
+                          todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
                               for(var j = 0; j < todoArray.length; j++) {
                                   createTask(dbResult.data[0].tocken, todoArray[j], dbResult.data[0].repositories[0].url).then(function(){
-                                    pipelineResult.code = 200;
-                                    pipelineResult.message = "Task was successfuly created";
-                                    return pipelineResult;
+                                    return apiResponce.gitHub.taskSuccessfulyCreated();
                                   });
                               }
+                        } else{
+                             return; 
                         }
                       });
                   } 
                   else {
-                        pipelineResult.code = 404,
-                        message = "User not found"
-                        return pipelineResult;
+                        return apiResponce.mongoDB.recordNotFound();
                   }
               }).catch(function(err){
-                  throw {
-                        code:500,
-                        name: 'MongoDB Error',
-                        message: "Something had happend when 'getDocumentByQuery(query)' start executed",
-                        extra: err
-                  }
+                  throw apiResponce.mongoDB.error();
               });
       })
 }
@@ -93,10 +88,7 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
   return new Promise(function(resolve,reject){
       var options = {
             url:'https://api.github.com/users/'+ gitHubUserName + '/repos',
-            headers:{
-                  'User-Agent': "//TODO's Manager",
-                  'Accept':'application/vnd.github.machine-man-preview+json'
-            }, 
+            headers:http.getRepositoryHeaders(), 
       }
 
       http.get(options).then(function(response){
@@ -164,21 +156,14 @@ createTask = function(accessTocken, message, repositoryUrl){
             
             var options = {
                   url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
-                  headers:{
-                        'Authorization': tocken,
-                        'User-Agent': "//TODO's Manager",
-                        'Accept':'application/vnd.github.machine-man-preview+json'
-                  },
+                  headers: http.getCreateTaskHeaders(),
                   body:task,
                   json:true,
             } 
       
             http.post(options).then(function(response){
                  if(response.statusCode !== 200){
-                       throw {
-                             code:500,
-                             message:"Something had happend when try to create task",
-                       }
+                       throw apiResponce.gitHub.failedToCreateTask();
                  }
             });
       })
