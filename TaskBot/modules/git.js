@@ -1,32 +1,41 @@
 var http = require('../modules/http');
 var dataAccessObject = require('../modules/dataAccessObject');
-//WORK
+var apiResponce = require('../modules/apiResponses');
+
 exports.startPipeline = function(webHook){
-      var commitsInPush = webHook.commits;
+      var commitsInPush,
+      repositoryId,
+      query,
+      commitId,
+      todoArray,
+
+      commitsInPush = webHook.commits;
       commitsInPush.forEach(function(commit){
+
             repositoryId = webHook.repository.id;
-            
-            var query = { "repositories.id" : repositoryId  }
-            var commitId = commit.id;
+            query = { repositoryID: repositoryId };
+            commitId = commit.id;
             
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
                       getCommitDiff(commitId).then(function(commitDiff){
-                          var todoArray = parseCommitDiff(commitDiff);
+                          todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
-                              for(var j = 0; j <= todoArray.length; j++) {
-                                  createTask(dbResult.data[0].tocken, todoArray[j]).then(function(code){
-                                      console.log(200);
+                              for(var j = 0; j < todoArray.length; j++) {
+                                  createTask(dbResult.data[0].tocken, todoArray[j], dbResult.data[0].repositories[0].url).then(function(){
+                                    return apiResponce.gitHub.taskSuccessfulyCreated();
                                   });
                               }
+                        } else{
+                             return; 
                         }
                       });
                   } 
                   else {
-                      return;
+                        return apiResponce.mongoDB.recordNotFound();
                   }
               }).catch(function(err){
-                  console.log(err);
+                  throw apiResponce.mongoDB.error();
               });
       })
 }
@@ -47,18 +56,12 @@ exports.getJwtTocken = function(gitHubCode){
             }
 
             http.post(options).then(function(response){
-                  var jsonObj;
-                        
-                  try{
-                        jsonObj = JSON.parse(response.body);
-                  }catch(e){
-                        return reject(e);
-                  }
-                        
-                  var access_token = jsonObj.access_token;
+                  var jsonObj, access_token;
+
+                  jsonObj = JSON.parse(response.body);      
+                  access_token = jsonObj.access_token;
+
                   return resolve(access_token);
-            }).catch(function(err){
-                  return reject(err);
             });
       });
 };
@@ -75,16 +78,9 @@ exports.getUserInfo = function(jwtTocken){
             },
       }
       http.get(options).then(function(response){
-           var userInfo
-           try{
-                 userInfo = JSON.parse(response.body);
-           }catch(e){
-                 return reject(e);
-           };
-           
+           var userInfo;
+           userInfo = JSON.parse(response.body);
            return resolve(userInfo);
-      }).catch(function(err){
-            return reject(err);
       });
     });
 }
@@ -92,21 +88,15 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
   return new Promise(function(resolve,reject){
       var options = {
             url:'https://api.github.com/users/'+ gitHubUserName + '/repos',
-            headers:{
-                  'User-Agent': "//TODO's Manager",
-                  'Accept':'application/vnd.github.machine-man-preview+json'
-            }, 
+            headers:http.getRepositoryHeaders(), 
       }
 
       http.get(options).then(function(response){
             var userRepositories = [];
             var userRepositoriesApiResponse;
 
-           try{
-                 userRepositoriesApiResponse = JSON.parse(response.body);
-           }catch(e){
-                 return reject(e);
-           };
+            userRepositoriesApiResponse = JSON.parse(response.body);
+          
            userRepositoriesApiResponse.forEach(function(repository){
                   userRepositories.push(
                         {
@@ -118,8 +108,6 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
                   );
             })
             return resolve(userRepositories);
-      }).catch(function(err){
-            return reject(err);
       });
   })
 }
@@ -135,9 +123,7 @@ getCommitDiff = function(commitId){
             http.get(options).then(function(response){
                   var commitDiff = response.body;
                   return resolve(commitDiff);
-            }).catch(function(err){
-                 return reject(err);
-            });   
+            });  
       });
 } 
 parseCommitDiff = function(diff){
@@ -159,7 +145,7 @@ parseCommitDiff = function(diff){
       }
       return resultDataAray;
 };
-createTask = function(accessTocken, message){
+createTask = function(accessTocken, message, repositoryUrl){
       return new Promise(function(resolve, reject){
             var tocken = 'token ' + accessTocken;
             
@@ -169,24 +155,16 @@ createTask = function(accessTocken, message){
             }
             
             var options = {
-                  url:'https://api.github.com/repos/ArturLavrov/AdaptiveWebSite/issues', 
-                  headers:{
-                        'Authorization': tocken,
-                        'User-Agent': "//TODO's Manager",
-                        'Accept':'application/vnd.github.machine-man-preview+json'
-                  },
+                  url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
+                  headers: http.getCreateTaskHeaders(),
                   body:task,
                   json:true,
             } 
       
             http.post(options).then(function(response){
-                 if(response.statusCode == 200){
-                       return resolve(200);
-                 }else{
-                       return reject(response.message);
+                 if(response.statusCode !== 200){
+                       throw apiResponce.gitHub.failedToCreateTask();
                  }
-            }).catch(function(err){
-                  return reject(err);
             });
       })
 };

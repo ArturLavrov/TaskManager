@@ -23,3 +23,16 @@ exports.get = function(requestOptions){
          });
   })
 }
+exports.getCreateTaskHeaders = function(){
+    return {
+        'Authorization': tocken,
+        'User-Agent': "//TODO's Manager",
+        'Accept':'application/vnd.github.machine-man-preview+json'
+    }
+}
+exports.getRepositoryHeaders = function(){
+    return{
+        'User-Agent': "//TODO's Manager",
+        'Accept':'application/vnd.github.machine-man-preview+json'
+    }
+}

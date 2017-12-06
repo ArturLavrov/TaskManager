@@ -2,6 +2,7 @@ var router = require('express').Router();
 var git = require('../modules/git');
 var dataAccessObject = require('../modules/dataAccessObject');
 var utils = require('../modules/utils');
+var apiResponse = require('../modules/apiResponses');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -52,7 +53,7 @@ router.get('/callback',function(req,res){
             })
          });
     }).catch(function(err){
-        console.log(err);
+          console.log(err);
     });
 });
 
@@ -63,11 +64,9 @@ router.post('/finsihedIntegration',function(req,res){
         if(utils.isJsonValid(JSON.stringify(data))) {
              dataAccessObject.insertDocument(data).then(function(dbResult){
                  if(dbResult.code === 200){
-                     var serverResponse = {
-                         code: 200,
-                         message: "Successfuly compleat integration",
-                     }
-                     res.send(serverResponse);
+                     res.send(200);
+                 }else{
+                     res.send(500);
                  }
              }).catch(function(err){
                  console.log(err);
@@ -86,13 +85,20 @@ router.post('/',function(req,res){
    var gitHubWebHook,
        query,
        commitId,
+       pipeLineResult,
        authorEmail;
-gitHubWebHook = req.body;
+    
+       gitHubWebHook = req.body;
 
    if(gitHubWebHook === "" || !gitHubWebHook.head_commit.distinct) {
-      return
-   }else {
-      git.startPipeline(gitHubWebHook);
+      res.send(apiResponse.gitHub.incorrectWebHook())
+   } else {
+     try{
+        pipeLineResult = git.startPipeline(gitHubWebHook);
+     }
+     catch(err){
+        console.log(err);
+     }
    }
 });
 module.exports = router;
