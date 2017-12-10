@@ -18,7 +18,8 @@ exports.startPipeline = function(webHook){
             
             dataAccessObject.getDocumentByQuery(query).then(function(dbResult){
                   if(dbResult.data.length > 0){
-                      getCommitDiff(commitId).then(function(commitDiff){
+                      getCommitDiff(commitId,dbResult.data[0].repositories[0].url)
+                        .then(function(commitDiff){
                           todoArray = parseCommitDiff(commitDiff);
                           if(todoArray.length > 0) {
                               for(var j = 0; j < todoArray.length; j++) {
@@ -112,9 +113,9 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
   })
 }
 
-getCommitDiff = function(commitId){
+getCommitDiff = function(commitId,repositoryUrl){
       return new Promise(function(resolve,reject){
-            var requestUrl = "https://github.com/ArturLavrov/AdaptiveWebSite/commit/" + commitId + ".diff";
+            var requestUrl = "https://github.com/"+repositoryUrl+"/commit/" + commitId + ".diff";
             
             var options = {
                   url: requestUrl, 
@@ -156,7 +157,7 @@ createTask = function(accessTocken, message, repositoryUrl){
             
             var options = {
                   url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
-                  headers: http.getCreateTaskHeaders(),
+                  headers: http.getCreateTaskHeaders(tocken),
                   body:task,
                   json:true,
             } 
