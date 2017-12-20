@@ -23,7 +23,7 @@ exports.get = function(requestOptions){
          });
   })
 }
-exports.getCreateTaskHeaders = function(){
+exports.getCreateTaskHeaders = function(tocken){
     return {
         'Authorization': tocken,
         'User-Agent': "//TODO's Manager",

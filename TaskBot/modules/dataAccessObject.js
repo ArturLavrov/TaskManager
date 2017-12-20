@@ -13,13 +13,13 @@ exports.insertDocument = function(userObject){
             db.collection(config.database.collection).insertOne(userObject, function(err, res) {
               if (err){ 
                 return reject(err);
-              };
-              
-              dbResult = {
-                code: 200,
-                phrase: 'SECCESS',
-                message: '1 document was inserted'
-              };
+              } else {
+                dbResult = {
+                  code: 200,
+                  phrase: 'SECCESS',
+                  message: '1 document was inserted'
+                };
+              }
               return resolve(dbResult);
               db.close();
             });

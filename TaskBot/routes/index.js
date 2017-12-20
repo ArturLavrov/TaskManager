@@ -13,6 +13,9 @@ router.get('/', function(req, res) {
 router.get('/callback',function(req,res){
     var gitHubCode = req.query.code,
         userTocken = 0,
+        query = {
+            email:""
+        }
         userObject = {
             tocken:0,
             gitHubId:"",
@@ -20,25 +23,34 @@ router.get('/callback',function(req,res){
             login:"",
             repositories:[]
         };
-
+    
     //TODO:move this code to some middleware.    
     git.getJwtTocken(gitHubCode).then(function(tocken){
          
         userTocken = tocken;
          
-         git.getUserInfo(tocken).then(function(userInfo){
-            
-            userObject.tocken = userTocken
-            userObject.gitHubId = userInfo.id,
-            userObject.email = userInfo.email,
-            userObject.login = userInfo.login,
-    
-             git.getUserRepositories(userObject.tocken, userObject.login).then(function(userRepos){
-                
-                userObject.repositories = userRepos;
-                
-                res.render('repos', { pageData:userObject })
-             });   
+         git.getUserInfo(tocken).then(function(userInfo){            
+            query.email = userInfo.email;
+            //TODO: use limit.Query should looks like: db.users.find({"email":"arturstylus@gmail.com"}).limit(1).
+            dataAccessObject.getDocumentByQuery(query).then(function(data){
+                if(data.length > 0){
+                    
+                    userObject.tocken = userTocken
+                    userObject.gitHubId = userInfo.id,
+                    userObject.email = userInfo.email,
+                    userObject.login = userInfo.login,
+                    
+                    git.getUserRepositories(userObject.tocken, userObject.login).then(function(userRepos){
+                        
+                        userObject.repositories = userRepos;
+                        
+                        res.render('repos', { pageData:userObject })
+                     });   
+                }
+                else{
+                   res.send('alreadyIntegrated.html');
+                }
+            })
          });
     }).catch(function(err){
           console.log(err);

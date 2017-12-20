@@ -44,13 +44,13 @@ block content
         dataType: "json",
         method: "POST",
         data: JSON.stringify(user),
-        success:function(code) {
-           if(code === 200){
-             console.log("success")
-           }
+        success:function(data){
+            if(data.code === 200){
+               window.location.replace(document.location.origin + '/finishedIntegration.html');
+            }
         },
         error:function(err){
-          alert("error");
+          alert(err)
         }
       });
     })
