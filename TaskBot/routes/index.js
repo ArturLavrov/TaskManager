@@ -33,8 +33,7 @@ router.get('/callback',function(req,res){
             query.email = userInfo.email;
             //TODO: use limit.Query should looks like: db.users.find({"email":"arturstylus@gmail.com"}).limit(1).
             dataAccessObject.getDocumentByQuery(query).then(function(data){
-                if(data.length > 0){
-                    
+                
                     userObject.tocken = userTocken
                     userObject.gitHubId = userInfo.id,
                     userObject.email = userInfo.email,
@@ -46,10 +45,6 @@ router.get('/callback',function(req,res){
                         
                         res.render('repos', { pageData:userObject })
                      });   
-                }
-                else{
-                   res.send('alreadyIntegrated.html');
-                }
             })
          });
     }).catch(function(err){
