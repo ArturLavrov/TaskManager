@@ -29,9 +29,7 @@ exports.insertDocument = function(userObject){
 exports.insertDocuments = function(docuements){
 }
 exports.getDocumentByQuery = function(query) {
-  var cacheKey = JSON.stringify(Array.prototype.slice.call(arguments));
     return new Promise(function(resolve, reject){
-      if(!exports.getDocumentByQuery.cache[cacheKey]){
         var dbResult;
           MongoClient.connect(config.database.url, function(err, db) {
             if (err) {
@@ -45,15 +43,10 @@ exports.getDocumentByQuery = function(query) {
                 code: 200,
                 data: result,
               };
-              exports.getDocumentByQuery.cache[cacheKey] = dbResult;
               return resolve(dbResult);
               db.close();
             });
           });
-      }else{
-         return resolve(exports.getDocumentByQuery.cache[cacheKey]);
-      }
     }) 
 }
-exports.getDocumentByQuery.cache = {};
 
