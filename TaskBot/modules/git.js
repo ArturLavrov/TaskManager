@@ -150,8 +150,10 @@ createTask = function(accessTocken, message, repositoryUrl){
       return new Promise(function(resolve, reject){
             var tocken = 'token ' + accessTocken;
             
+            var issueTitle = capitalizeFirstLetter(message);
+
             var task = {
-                  title: message,
+                  title: issueTitle,
                   body: '',
             }
             
@@ -169,3 +171,6 @@ createTask = function(accessTocken, message, repositoryUrl){
             });
       })
 };
+capitalizeFirstLetter = function(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+  }
