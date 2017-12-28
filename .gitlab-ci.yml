@@ -17,12 +17,15 @@ build_project:
     - npm --prefix Taskbot build
   only:
     - master
+    - production
+    
 test_project:
   stage: test
   script:
     - echo "Run project tests"
   only:
     - master
+    - production
     
 deploy_staging:
   stage: deploy
