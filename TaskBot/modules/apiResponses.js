@@ -40,7 +40,7 @@ exports.mongoDB.recordNotFound = function(){
 exports.mongoDB.insertionSuccessful = function(){
     var response = {
         code: 200,
-        phrase: 'SECCESS',
+        phrase: 'SUCCESS',
         message: '1 document was inserted'
     }
     return response;

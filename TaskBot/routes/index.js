@@ -59,12 +59,13 @@ router.post('/finsihedIntegration',function(req,res){
         if(utils.isJsonValid(JSON.stringify(data))) {
              dataAccessObject.insertDocument(data).then(function(dbResult){
                  if(dbResult.code === 200){
-                     res.send(200);
+                     res.send(apiResponse.mongoDB.insertionSuccessful());
                  }else{
                      res.send(500);
                  }
              }).catch(function(err){
                  console.log(err);
+                 res.send(apiResponse.mongoDB.error(err));
              }); 
         }else {
              res.send(500);
