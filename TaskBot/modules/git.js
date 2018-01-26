@@ -1,6 +1,7 @@
 var http = require('../modules/http');
 var dataAccessObject = require('../modules/dataAccessObject');
 var apiResponce = require('../modules/apiResponses');
+var utils = require('../modules/utils');
 
 exports.startPipeline = function(webHook){
       var commitsInPush,
@@ -42,20 +43,7 @@ exports.startPipeline = function(webHook){
 }
 exports.getJwtTocken = function(gitHubCode){
       return new Promise(function(resolve, reject){
-            var formData = {
-                  client_id: 'Iv1.9b56ab47a227f5d6',
-                  client_secret: '73250b0dff85c135ca9ae11dd6db571221b393fd',
-                  code: gitHubCode,
-            }
-            
-            var options = {
-                  url:'https://github.com/login/oauth/access_token', 
-                  headers:{
-                  'Accept': 'application/json'
-                  },
-                  formData:formData,
-            }
-
+            var options = http.getJwtOptions();
             http.post(options).then(function(response){
                   var jsonObj, access_token;
 
@@ -68,18 +56,16 @@ exports.getJwtTocken = function(gitHubCode){
 };
 exports.getUserInfo = function(jwtTocken){
     return new Promise(function(resolve,reject){
-      var tocken = 'token ' + jwtTocken;
+      var headers,tocken,options, userInfo;
       
-      var options = {
+      headers = http.getCreateTaskHeaders();
+      tocken = 'token ' + jwtTocken;
+      
+      options = {
             url:'https://api.github.com/user', 
-            headers:{
-                  'Authorization': tocken,
-                  'User-Agent': "//TODO's Manager",
-                  'Accept':'application/vnd.github.machine-man-preview+json'
-            },
+            headers:headers,
       }
       http.get(options).then(function(response){
-           var userInfo;
            userInfo = JSON.parse(response.body);
            return resolve(userInfo);
       });
@@ -98,7 +84,7 @@ exports.getUserRepositories = function(jwtTocken, gitHubUserName){
 
             userRepositoriesApiResponse = JSON.parse(response.body);
           
-           userRepositoriesApiResponse.forEach(function(repository){
+            userRepositoriesApiResponse.forEach(function(repository){
                   userRepositories.push(
                         {
                               name: repository.name,
@@ -148,22 +134,19 @@ parseCommitDiff = function(diff){
 };
 createTask = function(accessTocken, message, repositoryUrl){
       return new Promise(function(resolve, reject){
-            var tocken = 'token ' + accessTocken;
+            var tocken,issueTitle,task,options;
             
-            var issueTitle = capitalizeFirstLetter(message);
+            tocken = 'token ' + accessTocken;
+            
+            issueTitle = utils.capitalizeFirstLetter(message);
 
-            var task = {
+            task = {
                   title: issueTitle,
                   body: '',
             }
             
-            var options = {
-                  url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
-                  headers: http.getCreateTaskHeaders(tocken),
-                  body:task,
-                  json:true,
-            } 
-      
+            options = http.getCreateTaskRequestOptions(tocken,repositoryUrl);
+
             http.post(options).then(function(response){
                  if(response.statusCode !== 200){
                        throw apiResponce.gitHub.failedToCreateTask();
@@ -171,6 +154,3 @@ createTask = function(accessTocken, message, repositoryUrl){
             });
       })
 };
-capitalizeFirstLetter = function(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-  }

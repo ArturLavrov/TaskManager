@@ -36,3 +36,28 @@ exports.getRepositoryHeaders = function(){
         'Accept':'application/vnd.github.machine-man-preview+json'
     }
 }
+exports.getJwtOptions = function(){
+    return {
+        url:'https://github.com/login/oauth/access_token', 
+        headers:{
+            'Accept': 'application/json'
+        },
+        formData:{
+            client_id: 'Iv1.9b56ab47a227f5d6',
+            client_secret: '73250b0dff85c135ca9ae11dd6db571221b393fd',
+            code: gitHubCode,
+        }
+    }
+}
+exports.getCreateTaskRequestOptions = function(tocken,repositoryUrl){
+    return {
+        url:"https://api.github.com/repos/"+ repositoryUrl +"/issues", 
+        headers:{
+            'Authorization': tocken,
+            'User-Agent': "//TODO's Manager",
+            'Accept':'application/vnd.github.machine-man-preview+json'
+        },
+        body:task,
+        json:true,
+    }
+}

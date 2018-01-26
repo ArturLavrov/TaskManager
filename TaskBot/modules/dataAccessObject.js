@@ -1,6 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
 var env = process.env.NODE_ENV || 'development';
 var config = require('../config')[env];
+var apiResponse = require('../modules/apiResponses');
 
 exports.insertDocument = function(userObject){
   return new Promise(function(resolve,reject){
@@ -14,11 +15,7 @@ exports.insertDocument = function(userObject){
               if (err){ 
                 return reject(err);
               } else {
-                dbResult = {
-                  code: 200,
-                  phrase: 'SECCESS',
-                  message: '1 document was inserted'
-                };
+                apiResponse.mongoDB.insertionSuccessful();
               }
               return resolve(dbResult);
               db.close();
@@ -38,11 +35,9 @@ exports.getDocumentByQuery = function(query) {
             db.collection(config.database.collection).find({ 'repositories.id': query.repositoryID },{ 'repositories.$': 1, 'email': 1, 'tocken': 1, 'githubid':1, 'login':1 }).toArray(function(err, result) {
               if (err) {
                 return reject(err);
-              };
-              dbResult = {
-                code: 200,
-                data: result,
-              };
+              }else {
+                apiResponse.mongoDB.insertionSuccessful();
+              }
               return resolve(dbResult);
               db.close();
             });
