@@ -24,14 +24,14 @@ router.get('/callback',function(req,res){
             repositories:[]
         };
     
-    //TODO: move this code to some middleware.    
+    //TODO:move this code to some middleware.    
     git.getJwtTocken(gitHubCode).then(function(tocken){
          
         userTocken = tocken;
          
          git.getUserInfo(tocken).then(function(userInfo){            
             query.email = userInfo.email;
-            //TODO: use limit.Query should looks like: db.users.find({"email":"useremail"}).limit(1).
+            //TODO:use limit.Query should looks like: db.users.find({"email":"useremail"}).limit(1).
             dataAccessObject.getDocumentByQuery(query).then(function(data){
                 
                     userObject.tocken = userTocken
